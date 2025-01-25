@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from 'express';
-import { AppDataSource } from '../index';
 import { Document } from '../models/Document';
+import { AppDataSource } from '../db/db';
 
 export const createDocument: RequestHandler = async (req: Request, res: Response): Promise<any> => {
   try {
