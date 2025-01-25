@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { AppDataSource } from '../index';
 import { Document } from '../models/Document';
 
-export const createDocument = async (req: Request, res: Response) => {
+export const createDocument: RequestHandler = async (req: Request, res: Response): Promise<any> => {
   try {
     const docRepo = AppDataSource.getRepository(Document);
     const { title, content } = req.body;
@@ -14,7 +14,7 @@ export const createDocument = async (req: Request, res: Response) => {
   }
 };
 
-export const getDocument = async (req: Request, res: Response) => {
+export const getDocument: RequestHandler  = async (req: Request, res: Response):  Promise<any> => {
   try {
     const docRepo = AppDataSource.getRepository(Document);
 		// @ts-ignore

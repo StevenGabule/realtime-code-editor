@@ -18,14 +18,7 @@ export const AppDataSource = new DataSource({
 
 AppDataSource.initialize()
     .then(() => {
-        console.log("Data Source has been initialized!")
 				app.use('/api/documents', documentRoutes);
-				// Basic test route
-				app.get('/', (req, res) => {
-					res.send('API is running')
-				});
-
-				// Start server
 				const PORT = process.env.PORT || 4000;
 				app.listen(PORT, () => {
 					console.log(`Server listening on port ${PORT}`);
