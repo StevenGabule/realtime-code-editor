@@ -94,7 +94,6 @@ io.on('connection', async (socket) => {
 
 	// Listen for operational transforms or text changes
 	socket.on('operation', async (data) => {
-		console.table(data)
 		const { docId, operation, baseVersion } = data;
 		try {
 			const { finalOp, newVersion: version } = await processOperation(docId, operation, baseVersion);

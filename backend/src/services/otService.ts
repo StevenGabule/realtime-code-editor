@@ -11,7 +11,6 @@ interface OperationData {
 }
 
 export async function processOperation(docId: number, operation: any, baseVersion: number) {
-  const docRepo = AppDataSource.getRepository(Document);
   const opRepo = AppDataSource.getRepository(Operation);
 
   // Use a transaction to ensure consistency
@@ -20,7 +19,7 @@ export async function processOperation(docId: number, operation: any, baseVersio
       where: { id: docId },
       lock: { mode: 'pessimistic_write' }  // Lock the document during processing
     });
-    
+
     if (!doc) {
       throw new Error(`Document with ID ${docId} not found`);
     }
@@ -31,8 +30,6 @@ export async function processOperation(docId: number, operation: any, baseVersio
         document: { id: docId },
         baseVersion: MoreThan(baseVersion)
       }
-      // ,
-      // order: { baseVersion: 'ASC' }
     });
 
     // Transform operation against all subsequent ops
@@ -49,9 +46,13 @@ export async function processOperation(docId: number, operation: any, baseVersio
       data: finalOp,
       document: { id: docId }
     });
+
     await transactionalEntityManager.save(newOp);
 
     // Apply operation to document content
+    const newContent = applyOperation(doc.content, finalOp);
+    console.log({newContent})
+    console.log({finalOp})
     doc.content = applyOperation(doc.content, finalOp);
     doc.version = newVersion;
     await transactionalEntityManager.save(doc);
@@ -61,27 +62,50 @@ export async function processOperation(docId: number, operation: any, baseVersio
 }
 
 function applyOperation(content: string, operation: OperationData): string {
-  if (!content) return '';
+  const currentContent = content || '';
+  
+  console.log('Operation:', {
+    type: operation.type,
+    position: operation.position,
+    text: operation.text,
+    length: operation.length
+  });
+  console.log('Before content:', currentContent);
   
   try {
+    let result = currentContent;
+    
     switch (operation.type) {
       case 'insert':
-        if (!operation.text) return content;
-        const insertPos = Math.min(Math.max(0, operation.position), content.length);
-        return content.slice(0, insertPos) + operation.text + content.slice(insertPos);
+        if (!operation.text) {
+          console.log('No text to insert');
+          return currentContent;
+        }
+        const insertPos = Math.min(Math.max(0, operation.position), currentContent.length);
+        result = currentContent.slice(0, insertPos) + operation.text + currentContent.slice(insertPos);
+        break;
         
       case 'delete':
-        if (!operation.length) return content;
-        const deletePos = Math.min(Math.max(0, operation.position), content.length);
-        const deleteLength = Math.min(operation.length, content.length - deletePos);
-        return content.slice(0, deletePos) + content.slice(deletePos + deleteLength);
+        if (!operation.length) {
+          console.log('No length specified for delete');
+          return currentContent;
+        }
+        const deletePos = Math.min(Math.max(0, operation.position), currentContent.length);
+        const deleteLength = Math.min(operation.length, currentContent.length - deletePos);
+        result = currentContent.slice(0, deletePos) + currentContent.slice(deletePos + deleteLength);
+        break;
         
       default:
-        return content;
+        console.log('Unknown operation type:', operation.type);
+        return currentContent;
     }
+    
+    console.log('After content:', result);
+    return result;
+    
   } catch (error) {
     console.error('Error applying operation:', error);
-    return content;
+    return currentContent;
   }
 }
 
