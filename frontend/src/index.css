@@ -1,0 +1,10 @@
+.cursor-decoration {
+  background-color: var(--user-color);
+  width: 2px !important;
+  margin-left: -1px;
+}
+
+.cursor-glyph {
+  background-color: var(--user-color);
+  width: 4px !important;
+}

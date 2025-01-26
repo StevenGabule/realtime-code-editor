@@ -8,6 +8,9 @@ export class Document {
   @Column()
   title!: string;
 
+  @Column()
+  version!: number;
+
   @Column('text')
   content!: string;
 

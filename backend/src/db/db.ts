@@ -15,4 +15,4 @@ export const AppDataSource = new DataSource({
 	synchronize: true,
 })
 
-AppDataSource.initialize().then(() => console.log('connected')).catch((e) => console.log(e));
+AppDataSource.initialize()

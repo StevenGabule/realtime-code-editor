@@ -17,11 +17,20 @@ export const createDocument: RequestHandler = async (req: Request, res: Response
 export const getDocument: RequestHandler  = async (req: Request, res: Response):  Promise<any> => {
   try {
     const docRepo = AppDataSource.getRepository(Document);
-		// @ts-ignore
-    const doc = await docRepo.findOne(req.params.id);
+    const doc = await docRepo.findOneBy({id: Number(req.params.id)});
     if (!doc) {
       return res.status(404).json({ message: 'Document not found' });
     }
+    return res.json(doc);
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+export const getDocuments: RequestHandler  = async (req: Request, res: Response):  Promise<any> => {
+  try {
+    const docRepo = AppDataSource.getRepository(Document);
+    const doc = await docRepo.find();
     return res.json(doc);
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error });
